@@ -6,7 +6,7 @@ const BASE_URL = 'https://api.football-data.org/v4/';
 
 const getStandings = async (competitionId) => {
     try {
-        const response = await axios.get(`${BASE_URL}competitions/${competitionId}/standings`, {
+        const response = await axios.get(`http://api.football-data.org/v4/competitions/PL/standings`, {
             headers: { 'X-Auth-Token': API_KEY }
         });
         return response.data;
@@ -18,15 +18,16 @@ const getStandings = async (competitionId) => {
 
 
 export const fetchCompetitionsDataController = async () => {
-    const premierLeagueData = await getStandings('PL');
-    const championsLeagueData = await getStandings('CL');
+    const PL = await getStandings(2021);
+    const CL = await getStandings(2016);
 
-    console.log('Premier League Standings:');
+    console.log('Premier League Standings:', PL);
     console.log('Champions League Standings:');
+
+    if (PL && CL) {
+        return res.status(200).json({ PL, CL })
+    }
 };
-
-
-
 
 
 export const getFixturesController = async (req, res) => {
