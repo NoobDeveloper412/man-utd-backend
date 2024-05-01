@@ -17,7 +17,6 @@ export const addMerchController = async (req, res) => {
 
 export const fetchAllMerchController = async (req, res) => {
     try {
-        console.log("Fetching all");
         const merchandise = await getAllMerch();
         res.json(merchandise);
     } catch (error) {

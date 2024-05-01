@@ -8,6 +8,7 @@ import fixturesRoutes from './routes/fixturesRoutes.js';
 import newsRoutes from './routes/newsRoutes.js';
 import merchRoutes from './routes/admin/merchRoutes.js';
 import merchRoutesCrud from './routes/admin/merchRoutesCrud.js';
+import liveScoreRoutes from './routes/liveScoreRoutes.js';
 import cors from "cors"
 import multer from 'multer';
 
@@ -30,6 +31,7 @@ app.use('/api', threadRoutes);
 app.use('/api', fixturesRoutes);
 app.use('/api', teamsRoutes);
 app.use('/api', newsRoutes);
+app.use('/api', liveScoreRoutes);
 
 // Admin Routes
 app.use('/api/admin/merch', upload.single('image'), merchRoutes);
