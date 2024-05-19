@@ -85,7 +85,7 @@ export const getBookingsPerSeasonController = async (req, res) => {
         const { matches } = await fetchMatchesBySeason(2021, 2023);
         console.log("matches fetched")
         
-        return res.json({ matches: matches })
+        // return res.json({ matches: matches })
         const seasonBookings = extractBookings(matches);
         
         console.log("seasons bookings sorted")

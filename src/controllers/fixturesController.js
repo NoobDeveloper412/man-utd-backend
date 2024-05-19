@@ -1,10 +1,11 @@
 import axios from 'axios';
 
-const API_KEY = process.env.FOOTBALL_API_KEY;  // Ensure you've set this in your environment variables
+// Ensure you've set this in your environment variables
 const BASE_URL = 'https://api.football-data.org/v4/';
 
 
 const getStandings = async (competitionId) => {
+    const API_KEY = process.env.FOOTBALL_API_KEY;
     try {
         const response = await axios.get(`http://api.football-data.org/v4/competitions/PL/standings`, {
             headers: { 'X-Auth-Token': API_KEY }
@@ -17,12 +18,9 @@ const getStandings = async (competitionId) => {
 };
 
 
-export const fetchCompetitionsDataController = async () => {
+export const fetchCompetitionsDataController = async (req, res) => {
     const PL = await getStandings(2021);
     const CL = await getStandings(2016);
-
-    console.log('Premier League Standings:', PL);
-    console.log('Champions League Standings:');
 
     if (PL && CL) {
         return res.status(200).json({ PL, CL })

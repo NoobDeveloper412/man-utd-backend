@@ -44,6 +44,8 @@ const loginController = async (req, res) => {
     const { email, password } = req.body;
     const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
+    console.log(data, signInError)
+
     if (signInError) {
         return res.status(401).json({ error: signInError.message });
     } else if (data) {
@@ -55,6 +57,7 @@ const loginController = async (req, res) => {
             process.env.ACCESS_TOKEN_SECRET,
             { expiresIn: '48h' }
         );
+
 
         res.status(200).json({ token, user, session });
     } else {

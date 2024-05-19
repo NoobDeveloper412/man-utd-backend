@@ -7,7 +7,6 @@ export const createThreadController = async (req, res) => {
         .from('threads')
         .insert([{ title, content, userid: userid }]); // Ensure this is the correct foreign key column
 
-    console.log(data)
     if (data.error) {
         return res.status(401).json({ error: error.message });
     } else {
@@ -42,6 +41,5 @@ export const getRecentThreads = async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 
-    console.log(data);
     res.status(200).json(data);
 };
