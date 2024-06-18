@@ -1,4 +1,9 @@
 import axios from 'axios';
+import schedule from 'node-schedule';
+
+
+let cachedData = null;
+let lastFetchTime = null;
 
 const getTeamData = async (teamId) => {
     const API_KEY = process.env.FOOTBALL_API_KEY;  // Ensure you've set this in your environment variables
@@ -51,59 +56,59 @@ export const getTeamScorersController = async (req, res) => {
     }
 }
 
-async function fetchMatchesBySeason(competitionId, season) {
-    const response = await axios.get(`http://api.football-data.org/v4/competitions/${competitionId}/matches?season=${season}`, {
-        headers: { 'X-Auth-Token': process.env.FOOTBALL_API_KEY }
-    });
 
-    return response.data;
-}
+const fetchBookingsAndCards = async (season, competitionId) => {
+    const BASE_URL = 'https://api.football-data.org/v4/';
+    try {
+        const response = await axios.get(`${BASE_URL}competitions/${competitionId}/matches?season=${season}`, {
+            headers: { 'X-Auth-Token': "02957bc40f9c478ea398705304c2caf6", 'X-Unfold-Bookings': true }
+        });
 
+        const matches = response.data.matches;
+        const bookingsAndCards = matches.map(match => ({
+            matchId: match.id,
+            bookings: match.bookings,
+            cards: match.cards
+        }));
 
-function extractBookings(matches) {
-    const seasonBookings = [];
-    console.log('Sorting season bookings...')
+        return bookingsAndCards;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        throw error;
+    }
+};
 
-    matches.forEach(match => {
-        // if (match.bookings.length > 0) {
-            seasonBookings.push(match.bookings);
-        // }
-    });
-    console.log('Sorted season bookings...')
+const refreshCache = async (season, competitionId) => {
+    console.log('Refreshing cache...');
+    try {
+        cachedData = await fetchBookingsAndCards(season, competitionId);
+        lastFetchTime = new Date();
+        console.log('Cache updated at', lastFetchTime);
+    } catch (error) {
+        console.error('Error refreshing cache:', error);
+    }
+};
 
-    return seasonBookings;
-}
+// Schedule cache refresh every 4 hours
+schedule.scheduleJob('0 */4 * * *', () => {
+    const season = '2024'; // Replace with your season variable
+    const competitionId = 2021; // Replace with your competitionId variable
+    refreshCache(season, competitionId);
+});
+
+// Initial cache load when the server starts
+// refreshCache(2023, 2021);
 
 export const getBookingsPerSeasonController = async (req, res) => {
-    const API_KEY = process.env.FOOTBALL_API_KEY;
-    const { filter } = req.body
+    const { filter } = req.body;
+    const { season, competitionId } = filter;
 
-    const { season } = filter
+    console.log(season, competitionId);
 
-    try {
-        // Step 1: Fetch Matches
-        const { matches } = await fetchMatchesBySeason(2021, 2023);
-        console.log("matches fetched")
-        
-        // return res.json({ matches: matches })
-        const seasonBookings = extractBookings(matches);
-        
-        console.log("seasons bookings sorted")
-        console.log(seasonBookings);
-        
-        
-        // Step 2: Process Bookings (Major Challenge)
-        // const bookingsPerTeam = processBookingsFromMatches(matches); 
-
-        // Step 3: Sort (Easy once you have bookings data)
-        // const sortedBookings = sortBookings(bookingsPerTeam);
-
-        // // Step 4: Send Response
-        // res.status(200).json({
-        //   success: true,
-        //   bookings: sortedBookings
-        // });
-    } catch (error) {
-        // ... Add robust error handling similar to the previous example ...
+    // Check if cache is empty or stale
+    if (!cachedData) {
+        await refreshCache(season, competitionId);
     }
-}
+
+    return res.json(cachedData);
+};

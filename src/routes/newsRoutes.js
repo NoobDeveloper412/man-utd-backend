@@ -6,7 +6,7 @@ const router = express.Router();
 
 
 // ************ PROTECTED ROUTES ****************   
-router.post('/fetch-news', authenticateToken, fetchNewsController);
+router.post('/fetch-news', fetchNewsController);
 
 
 

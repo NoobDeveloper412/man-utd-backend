@@ -7,7 +7,7 @@ const BASE_URL = 'https://api.football-data.org/v4/';
 const getStandings = async (competitionId) => {
     const API_KEY = process.env.FOOTBALL_API_KEY;
     try {
-        const response = await axios.get(`http://api.football-data.org/v4/competitions/PL/standings`, {
+        const response = await axios.get(`http://api.football-data.org/v4/competitions/${competitionId}/standings`, {
             headers: { 'X-Auth-Token': API_KEY }
         });
         return response.data;
@@ -19,31 +19,38 @@ const getStandings = async (competitionId) => {
 
 
 export const fetchCompetitionsDataController = async (req, res) => {
+    console.log("Fetching standings...")
     const PL = await getStandings(2021);
     const CL = await getStandings(2016);
 
     if (PL && CL) {
+        console.log("Standings fetched.")
+
         return res.status(200).json({ PL, CL })
     }
 };
 
 
 export const getFixturesController = async (req, res) => {
-    const API_KEY = process.env.FOOTBALL_API_KEY  // Replace with your Football Data API key
+    const API_KEY = process.env.FOOTBALL_API_KEY;
     const teamId = '66';  // Manchester United's team ID in the Football Data API
-    const { filter } = req.body
+    const { filter, seasonYear, competitionId } = req.body;
+    console.log(req.body);
+
+
 
     try {
-        const response = await axios.get(`${BASE_URL}teams/${teamId}/matches?status=${filter}`, {
+        const response = await axios.get(`${BASE_URL}teams/${teamId}/matches?competitions=${competitionId === 2021 ? "PL" : 'CL'}&season=${seasonYear}&status=${filter}`, {
             headers: {
                 'X-Auth-Token': API_KEY
             }
         });
 
+        console.log(response.data)
         // Assuming the API returns a list of matches in a 'matches' array
         res.json({
             success: true,
-            data: response.data  // Modify according to actual API response structure
+            data: response.data
         });
     } catch (error) {
         // Log the error and send a generic error message to the client

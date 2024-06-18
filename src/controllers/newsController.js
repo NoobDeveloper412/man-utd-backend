@@ -22,8 +22,8 @@ const getNews = async () => {
 
 
 export const fetchNewsController = async (req, res) => {
+    console.log('Requesting news...')
     const newsData = await getNews();
-    console.log(newsData);
     if (newsData) {
         return res.status(200).json(newsData)
     }
